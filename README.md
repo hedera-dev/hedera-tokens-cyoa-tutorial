@@ -1,8 +1,8 @@
 # Base Template for Hedera Tutorial Demo Repos
 
-Intended to be used as a common starting point for demo repos for tutorials.
+Choose-your-own-Adventure to create Tokens on Hedera.
 
-<a href="https://gitpod.io/?autostart=true&editor=code&workspaceClass=g1-standard#https://github.com/hedera-dev/hedera-tutorial-demo-base-template" target="_blank" rel="noreferrer">
+<a href="https://gitpod.io/?autostart=true&editor=code&workspaceClass=g1-standard#https://github.com/hedera-dev/hedera-tokens-cyoa-tutorial" target="_blank" rel="noreferrer">
   <img src="./img/gitpod-open-button.svg" />
 </a>
 

@@ -1,7 +1,7 @@
 {
-  "name": "hedera-tutorial-demo-base-template",
+  "name": "hedera-tokens-cyoa-tutorial",
   "version": "0.0.0",
-  "description": "Intended to be used as a common starting point for demo repos for tutorials",
+  "description": "Choose-your-own-Adventure to create Tokens on Hedera",
   "main": "init.js",
   "scripts": {
     "update-from-base-template": "npx github:hedera-dev/hedera-tutorial-demo-base-template update",
@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hedera-dev/hedera-tutorial-demo-base-template.git"
+    "url": "git+https://github.com/hedera-dev/hedera-tokens-cyoa-tutorial.git"
   },
   "keywords": [
     "hedera",
@@ -23,9 +23,9 @@
   "author": "bguiz",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/hedera-dev/hedera-tutorial-demo-base-template/issues"
+    "url": "https://github.com/hedera-dev/hedera-tokens-cyoa-tutorial/issues"
   },
-  "homepage": "https://github.com/hedera-dev/hedera-tutorial-demo-base-template#readme",
+  "homepage": "https://github.com/hedera-dev/hedera-tokens-cyoa-tutorial#readme",
   "dependencies": {
     "@hashgraph/sdk": "2.48.1",
     "dotenv": "16.4.5"
