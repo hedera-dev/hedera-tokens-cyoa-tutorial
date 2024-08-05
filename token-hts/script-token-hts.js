@@ -11,13 +11,13 @@ import {
 } from '../util/util.js';
 
 const logger = await createLogger({
-    scriptId: '__SCRIPTID__',
+    scriptId: 'token-hts',
     scriptCategory: 'task',
 });
 let client;
 
-async function __SCRIPTFUNCTIONNAME__() {
-    logger.logStart('Welcome to the __SCRIPTID__ task!');
+async function scriptToken-hts() {
+    logger.logStart('Welcome to the token-hts task!');
 
     // Read in environment variables from `.env` file in parent directory
     dotenv.config({ path: '../.env' });
@@ -45,7 +45,7 @@ async function __SCRIPTFUNCTIONNAME__() {
     logger.logComplete('Demo task complete!');
 }
 
-__SCRIPTFUNCTIONNAME__().catch((ex) => {
+scriptToken-hts().catch((ex) => {
     client && client.close();
     logger ? logger.logError(ex) : console.error(ex);
 });
