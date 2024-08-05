@@ -11,13 +11,13 @@ import {
 } from '../util/util.js';
 
 const logger = await createLogger({
-    scriptId: 'token-hscs',
+    scriptId: 'tokenHts',
     scriptCategory: 'task',
 });
 let client;
 
-async function scriptToken-hscs() {
-    logger.logStart('Welcome to the token-hscs task!');
+async function scriptTokenHts() {
+    logger.logStart('Welcome to the tokenHts task!');
 
     // Read in environment variables from `.env` file in parent directory
     dotenv.config({ path: '../.env' });
@@ -35,17 +35,17 @@ async function scriptToken-hscs() {
     logger.log('Using account:', operatorIdStr);
 
     await logger.logSectionWithWaitPrompt('Running the main part of the script');
-    console.log('Doing something that takes 1 second.');
+    logger.log('Doing something that takes 1 second.');
     await (new Promise((resolve) => { setTimeout(resolve, 1_000) }));
     if (!!true) {
         throw new Error('Demo error, this was inevitable!');
     }
 
     client.close();
-    logger.logComplete('Demo task complete!');
+    logger.logComplete('tokenHts task complete!');
 }
 
-scriptToken-hscs().catch((ex) => {
+scriptTokenHts().catch((ex) => {
     client && client.close();
     logger ? logger.logError(ex) : console.error(ex);
 });
