@@ -12,6 +12,7 @@ import {
 import dotenv from 'dotenv';
 import {
     createLogger,
+    queryAccountByEvmAddress,
 } from '../util/util.js';
 
 const logger = await createLogger({
@@ -32,12 +33,9 @@ async function scriptTokenHts() {
     const operatorKeyStr = process.env.OPERATOR_ACCOUNT_PRIVATE_KEY;
     const account1EvmAddress = process.env.ACCOUNT_1_EVM_ADDRESS;
     const account1KeyStr = process.env.ACCOUNT_1_PRIVATE_KEY;
-    const account2EvmAddress = process.env.ACCOUNT_2_EVM_ADDRESS;
-    const account2KeyStr = process.env.ACCOUNT_2_PRIVATE_KEY;
     if (!operatorIdStr || !operatorKeyStr ||
-        !account1EvmAddress || !account1KeyStr ||
-        !account2EvmAddress || !account2KeyStr) {
-        throw new Error('Must set OPERATOR_ACCOUNT_ID, OPERATOR_ACCOUNT_PRIVATE_KEY, ACCOUNT_1_EVM_ADDRESS, and ACCOUNT_1_PRIVATE_KEY, ACCOUNT_2_EVM_ADDRESS, and ACCOUNT_2_PRIVATE_KEY environment variables');
+        !account1EvmAddress || !account1KeyStr ) {
+        throw new Error('Must set OPERATOR_ACCOUNT_ID, OPERATOR_ACCOUNT_PRIVATE_KEY, ACCOUNT_1_EVM_ADDRESS, and ACCOUNT_1_PRIVATE_KEY environment variables');
     }
     const operatorId = AccountId.fromString(operatorIdStr);
     const operatorKey = PrivateKey.fromStringECDSA(operatorKeyStr);
@@ -98,15 +96,17 @@ async function scriptTokenHts() {
     logger.log('View on Hashscan:\n', ...logger.applyAnsi('URL', tokenHashScanUrl));
 
     // TokenAssociateTransaction
-    // NOTE "NO_REMAINING_AUTOMATIC_ASSOCIATIONS"
     await logger.logSectionWithWaitPrompt('Configuring token association');
+    // NOTE "INVALID_ACCOUNT_ID" when using EVM address
+    // instead of S.R.N. format for account ID,
+    // hence the need to use `queryAccountByEvmAddress` below.
+    // See: https://github.com/hashgraph/hedera-sdk-js/issues/2442
+    const {
+        accountId: account1Id,
+    } = await queryAccountByEvmAddress(account1EvmAddress);
     const assocTx = await new TokenAssociateTransaction()
-        // .setAccountId(account1EvmAddress)
-        // .setAccountId(AccountId.fromEvmAddress(0, 0, account1EvmAddress))
-        .setAccountId(AccountId.fromString('0.0.4654396'))
+        .setAccountId(account1Id)
         .setTokenIds([tokenId])
-        // Set the Node ID that will process the transaction
-        .setNodeAccountIds([AccountId.fromString('0.0.5')])
         // Freeze the transaction to prepare for signing
         .freezeWith(client);
 
@@ -136,6 +136,8 @@ async function scriptTokenHts() {
 
     // TransferTransaction
     await logger.logSectionWithWaitPrompt('Configuring token transfer');
+    // NOTE "NO_REMAINING_AUTOMATIC_ASSOCIATIONS" when using EVM address
+    // here means that TokenAssociateTransaction above did not work.
     const transferTx = await new TransferTransaction()
         .setTransactionMemo(`Fungible Tokens CYOA transfer - ${logger.version}`)
         // Debit 1.00 tokens from the operator account (sender)
