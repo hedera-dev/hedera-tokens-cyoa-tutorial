@@ -1,9 +1,12 @@
 #!/usr/bin/env node
 
-import { createPublicClient, http } from 'viem';
+import fs from 'node:fs/promises';
+import { createWalletClient, http, publicActions } from 'viem';
+import { privateKeyToAccount } from 'viem/accounts';
 import { hederaTestnet } from 'viem/chains';
 import dotenv from 'dotenv';
 import {
+    CHARS,
     createLogger,
 } from '../util/util.js';
 
@@ -38,13 +41,16 @@ async function scriptTokenHscs() {
     if (!operatorEvmAddressStr || !operatorKeyStr) {
         throw new Error('Must set OPERATOR_ACCOUNT_ID and OPERATOR_ACCOUNT_EVM_ADDRESS environment variables');
     }
-
-    const web3Client = createPublicClient({
-      chain: hederaTestnet,
-      transport: http(rpcUrlHederatestnet, {
-        batch: false,
-      }),
-    });
+    const operatorAccount = privateKeyToAccount(operatorKeyStr);
+    const client = createWalletClient({
+        account: operatorAccount,
+        chain: hederaTestnet,
+        transport: http(rpcUrlHederatestnet, {
+          batch: false,
+        }),
+    }).extend(publicActions);
+    logger.log('Using account:', operatorEvmAddressStr);
+    logger.log('Using RPC endpoint:', rpcUrlHederatestnet);
 
     // // Initialise the operator account
     // const operatorIdStr = process.env.OPERATOR_ACCOUNT_ID;
@@ -59,17 +65,22 @@ async function scriptTokenHscs() {
 
     // Solidity ERC20 minimal impl
     await logger.logSectionWithWaitPrompt('Checking Solidity smart contract source code');
-    // TODO
+    const myTokenSource = await fs.readFile(`my_token.sol`, { encoding: 'utf8' });
+    logger.log('Source code smart contract Solidity:', myTokenSource.substring(0, 32), CHARS.HELLIP);
 
     // solc compile + generate ABI
     await logger.logSectionWithWaitPrompt('Loading EVM bytecode + ABI (solc outputs)');
-    // TODO
+    const solidityFileNamePrefix = 'my_token_sol_';
+    const myTokenAbi = await fs.readFile(`${solidityFileNamePrefix}MyToken.abi`, { encoding: 'utf8' });
+    const myTokenEvmBytecode = await fs.readFile(`${solidityFileNamePrefix}MyToken.bin`, { encoding: 'utf8' });
+    logger.log('Compiled smart contract ABI:', myTokenAbi.substring(0, 32), CHARS.HELLIP);
+    logger.log('Compiled smart contract EVM bytecode:', myTokenEvmBytecode.substring(0, 32), CHARS.HELLIP);
 
     // check JSON-RPC relay
     await logger.logSectionWithWaitPrompt('Checking JSON-RPC endpoint liveness');
     const [blockNumber, balance] = await Promise.all([
-        web3Client.getBlockNumber(),
-        web3Client.getBalance({
+        client.getBlockNumber(),
+        client.getBalance({
             address: '0x7394111093687e9710b7a7aeba3ba0f417c54474',
         }),
     ]);
