@@ -4,7 +4,7 @@
 tasks:
   - name: "rpcrelay_pull"
     init: |
-      bash ./util/03-rpcrelay-pull.sh
+      bash ./util/03-get-dependencies.sh
   - name: "rpcrelay_run"
     init: |
       gp sync-await main
