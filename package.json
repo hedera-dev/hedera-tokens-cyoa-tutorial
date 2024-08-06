@@ -28,6 +28,7 @@
   "homepage": "https://github.com/hedera-dev/hedera-tokens-cyoa-tutorial#readme",
   "dependencies": {
     "@hashgraph/sdk": "2.48.1",
-    "dotenv": "16.4.5"
+    "dotenv": "16.4.5",
+    "viem": "2.7.3"
   }
 }
