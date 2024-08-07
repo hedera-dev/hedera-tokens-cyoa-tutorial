@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import fs from 'node:fs/promises';
 import {
     Client,
     PrivateKey,
@@ -8,6 +9,7 @@ import {
     TokenType,
     TokenAssociateTransaction,
     TransferTransaction,
+    EntityIdHelper,
 } from '@hashgraph/sdk';
 import dotenv from 'dotenv';
 import {
@@ -94,6 +96,19 @@ async function scriptTokenHts() {
     logger.log('tokenId:', tokenId.toString());
     const tokenHashScanUrl = `https://hashscan.io/testnet/token/${tokenId.toString()}`;
     logger.log('View on Hashscan:\n', ...logger.applyAnsi('URL', tokenHashScanUrl));
+
+    // output token ID to file, so can be read as input later by the htsHscsInterop task
+    const { shard, realm, num } =
+        EntityIdHelper.fromString(tokenId.toString());
+    const tokenEvmAddress = '0x' + EntityIdHelper.toSolidityAddress([shard, realm, num]);
+    const artefacts = {
+        tokenCreateTxId: tokenCreateTxId.toString(),
+        tokenId: tokenId.toString(),
+        tokenEvmAddress: tokenEvmAddress.toString(),
+    };
+    const artefactsFile = 'artefacts.json';
+    await fs.writeFile(artefactsFile, JSON.stringify(artefacts));
+    logger.log('Artefacts saved to file:', artefactsFile, artefacts);
 
     // TokenAssociateTransaction
     await logger.logSectionWithWaitPrompt('Configuring token association');
