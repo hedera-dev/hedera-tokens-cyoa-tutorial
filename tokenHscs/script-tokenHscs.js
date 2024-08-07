@@ -42,8 +42,11 @@ async function scriptTokenHscs() {
     }
     const operatorEvmAddressStr = process.env.OPERATOR_ACCOUNT_EVM_ADDRESS;
     const operatorKeyStr = process.env.OPERATOR_ACCOUNT_PRIVATE_KEY;
-    if (!operatorEvmAddressStr || !operatorKeyStr) {
-        throw new Error('Must set OPERATOR_ACCOUNT_ID and OPERATOR_ACCOUNT_EVM_ADDRESS environment variables');
+    const account1EvmAddress = process.env.ACCOUNT_1_EVM_ADDRESS;
+    const account1KeyStr = process.env.ACCOUNT_1_PRIVATE_KEY;
+    if (!operatorEvmAddressStr || !operatorKeyStr ||
+        !account1EvmAddress || !account1KeyStr ) {
+        throw new Error('Must set OPERATOR_ACCOUNT_ID, OPERATOR_ACCOUNT_PRIVATE_KEY, ACCOUNT_1_EVM_ADDRESS, and ACCOUNT_1_PRIVATE_KEY environment variables');
     }
     const operatorAccount = privateKeyToAccount(operatorKeyStr);
     const client = createWalletClient({
@@ -83,7 +86,9 @@ async function scriptTokenHscs() {
     logger.log('Compiled smart contract ABI string:', myTokenAbiStr.substring(0, 32), CHARS.HELLIP);
     logger.log('Compiled smart contract EVM bytecode:', myTokenEvmBytecode.substring(0, 32), CHARS.HELLIP);
     const myTokenAbi = JSON.parse(myTokenAbiStr);
-    logger.log('Compiled smart contract ABI parse:', myTokenAbi);
+    logger.log('Compiled smart contract ABI parse:\n', myTokenAbi.map((item) => {
+        return `- ${item.type}: "${item.name || ''}"`;
+    }).join('\n'));
 
     // check JSON-RPC relay
     await logger.logSectionWithWaitPrompt('Checking JSON-RPC endpoint liveness');
@@ -118,6 +123,7 @@ async function scriptTokenHscs() {
     const deployTxReceipt = await client.getTransactionReceipt({
         hash: deployTxHash,
     });
+    logger.log('Deployment transaction receipt status:', deployTxReceipt.status);
     const deployAddress = deployTxReceipt.contractAddress;
     logger.log('Deployment transaction address:', deployAddress);
     const deployAddressHashscanUrl = `https://hashscan.io/testnet/contract/${deployAddress}`;
@@ -128,11 +134,38 @@ async function scriptTokenHscs() {
 
     // EVM transfer transaction via viem
     await logger.logSectionWithWaitPrompt('Submit EVM transaction over RPC to transfer token balance');
-    // TODO
+    // function transfer(address to, uint256 amount) external returns (bool);
+    const transferTxHash = await client.writeContract({
+        address: deployAddress,
+        abi: myTokenAbi,
+        functionName: 'transfer',
+        args: [
+            account1EvmAddress, // address to
+            100n, // uint256 amount
+        ],
+        account: operatorAccount,
+    });
+    logger.log('Transfer transaction hash:', transferTxHash);
+    const transferTxHashscanUrl = `https://hashscan.io/testnet/transaction/${transferTxHash}`;
+    logger.log(
+        'Transfer transaction Hashscan URL:\n',
+        ...logger.applyAnsi('URL', transferTxHashscanUrl),
+    );
+    const transferTxReceipt = await client.getTransactionReceipt({
+        hash: transferTxHash,
+    });
+    logger.log('Transfer transaction receipt status:', transferTxReceipt.status);
 
     // EVM balance query via viem
     await logger.logSectionWithWaitPrompt('Submit EVM request over RPC to query token balance');
-    // TODO
+    // function balanceOf(address account) external view returns (uint256);
+    const queryResult = await client.readContract({
+        address: deployAddress,
+        abi: myTokenAbi,
+        functionName: 'balanceOf',
+        args: [account1EvmAddress],
+    });
+    logger.log('Balance of query result:', queryResult);
 
     logger.logComplete('tokenHscs task complete!');
 }

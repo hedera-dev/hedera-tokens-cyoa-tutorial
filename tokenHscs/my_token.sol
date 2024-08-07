@@ -46,6 +46,7 @@ contract MyToken is IERC20 {
     constructor(string memory _symbol, string memory _name) {
         symbol = _symbol;
         name = _name;
+        mint(msg.sender, 1_000_000_000_000_000_000_000_000);
     }
 
     function transfer(address dst, uint256 wad) external returns (bool) {
@@ -53,7 +54,7 @@ contract MyToken is IERC20 {
     }
 
     function transferFrom(address src, address dst, uint256 wad) public returns (bool) {
-        require(balances[src] >= wad, "nsufficient-balance");
+        require(balances[src] >= wad, "insufficient-balance");
         if (src != msg.sender && allowances[src][msg.sender] != type(uint256).max) {
             require(allowances[src][msg.sender] >= wad, "insufficient-allowances");
             allowances[src][msg.sender] = Math.safeSub(allowances[src][msg.sender], wad);
