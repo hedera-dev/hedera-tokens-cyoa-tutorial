@@ -75,9 +75,16 @@ async function scriptTokenHtsHscsInterop() {
     // obtain the HTS fungible token's token ID, and convert to address.
     // From tokenHts script
     await logger.logSectionWithWaitPrompt('Obtain EVM address of existing HTS fungible token');
-    // TODO
+    const tokenHtsArtefactsFile = path.resolve('../tokenHts', 'artefacts.json');
+    const tokenHtsArtefactsJson = await fs.readFile(tokenHtsArtefactsFile, { encoding: 'utf8' });
+    logger.log('Token HTS artefacts:', tokenHtsArtefactsJson.substring(0, 32), CHARS.HELLIP);
+    const tokenHtsArtefacts = JSON.parse(tokenHtsArtefactsJson);
+    const tokenEvmAddress = tokenHtsArtefacts.tokenEvmAddress;
+    logger.log('Token HTS EVM address:', tokenEvmAddress);
+    const tokenEvmAddressHashScanURl = `https://hashscan.io/testnet/token/${tokenEvmAddress}`;
+    logger.log('Token HTS EVM address Hashscan URL:', tokenEvmAddress);
 
-    // obtain ERC20 ABI .
+    // obtain ERC20 ABI.
     // From tokenHscs script
     await logger.logSectionWithWaitPrompt('Loading ABI (solc outputs)');
     const solidityFileNamePrefix = path.resolve('../tokenHscs', 'my_token_sol_');
@@ -102,7 +109,39 @@ async function scriptTokenHtsHscsInterop() {
     // perform transfer of the HTS fungible token
     // by invoking the ERC20 ABI's transfer function on HSCS via viem
     await logger.logSectionWithWaitPrompt('Submit EVM transaction over RPC to transfer HTS token balance (HSCS interoperability)');
-    // TODO
+
+    // function transfer(address to, uint256 amount) external returns (bool);
+    const transferTxHash = await client.writeContract({
+        address: tokenEvmAddress,
+        abi: myTokenAbi,
+        functionName: 'transfer',
+        args: [
+            account1EvmAddress, // address to
+            100n, // uint256 amount
+        ],
+        account: operatorAccount,
+    });
+    logger.log('Transfer transaction hash:', transferTxHash);
+    const transferTxHashscanUrl = `https://hashscan.io/testnet/transaction/${transferTxHash}`;
+    logger.log(
+        'Transfer transaction Hashscan URL:\n',
+        ...logger.applyAnsi('URL', transferTxHashscanUrl),
+    );
+    const transferTxReceipt = await client.getTransactionReceipt({
+        hash: transferTxHash,
+    });
+    logger.log('Transfer transaction receipt status:', transferTxReceipt.status);
+
+    // EVM balance query via viem
+    await logger.logSectionWithWaitPrompt('Submit EVM request over RPC to query token balance');
+    // function balanceOf(address account) external view returns (uint256);
+    const queryResult = await client.readContract({
+        address: tokenEvmAddress,
+        abi: myTokenAbi,
+        functionName: 'balanceOf',
+        args: [account1EvmAddress],
+    });
+    logger.log('Balance of query result:', queryResult);
 
     logger.logComplete('tokenHtsHscsInterop task complete!');
 }
