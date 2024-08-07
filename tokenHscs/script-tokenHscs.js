@@ -62,17 +62,6 @@ async function scriptTokenHscs() {
     logger.log('Using account:', operatorEvmAddressStr);
     logger.log('Using RPC endpoint:', rpcUrlHederatestnet);
 
-    // // Initialise the operator account
-    // const operatorIdStr = process.env.OPERATOR_ACCOUNT_ID;
-    // const operatorKeyStr = process.env.OPERATOR_ACCOUNT_PRIVATE_KEY;
-    // if (!operatorIdStr || !operatorKeyStr) {
-    //     throw new Error('Must set OPERATOR_ACCOUNT_ID and OPERATOR_ACCOUNT_PRIVATE_KEY environment variables');
-    // }
-    // const operatorId = AccountId.fromString(operatorIdStr);
-    // const operatorKey = PrivateKey.fromStringECDSA(operatorKeyStr);
-    // client = Client.forTestnet().setOperator(operatorId, operatorKey);
-    // logger.log('Using account:', operatorIdStr);
-
     // Solidity ERC20 minimal impl
     await logger.logSectionWithWaitPrompt('Checking Solidity smart contract source code');
     const myTokenSource = await fs.readFile(`my_token.sol`, { encoding: 'utf8' });
