@@ -557,20 +557,20 @@ async function queryAccountByEvmAddress(evmAddress) {
         // do nothing
     }
     return {
+        accountEvmAddress,
         accountId,
         accountBalance,
-        accountEvmAddress,
     }
 }
 
 async function queryAccountByPrivateKey(privateKeyStr) {
     const privateKeyObj = PrivateKey.fromStringECDSA(privateKeyStr);
-    const publicKey = `0x${ privateKeyObj.publicKey.toStringRaw() }`;
+    const accountPublicKey = `0x${ privateKeyObj.publicKey.toStringRaw() }`;
     let accountId;
     let accountBalance;
     let accountEvmAddress;
     const accountFetchApiUrl =
-        `https://testnet.mirrornode.hedera.com/api/v1/accounts?account.publickey=${publicKey}&balance=true&limit=1&order=desc`;
+        `https://testnet.mirrornode.hedera.com/api/v1/accounts?account.publickey=${accountPublicKey}&balance=true&limit=1&order=desc`;
     console.log('Fetching: ', accountFetchApiUrl);
     try {
         const accountFetch = await fetch(accountFetchApiUrl);
@@ -583,9 +583,10 @@ async function queryAccountByPrivateKey(privateKeyStr) {
         // do nothing
     }
     return {
+        accountPublicKey,
+        accountEvmAddress,
         accountId,
         accountBalance,
-        accountEvmAddress,
     }
 }
 

@@ -5,12 +5,14 @@ const fs = require('fs/promises');
 const path = require('path');
 const { stdin, stdout } = require('node:process');
 const {
-    PrivateKey,
     Mnemonic,
+    PrivateKey,
 } = require('@hashgraph/sdk');
 const dotenv = require('dotenv');
 const {
     createLogger,
+    queryAccountByEvmAddress,
+    queryAccountByPrivateKey,
 } = require('../util/util.js');
 
 let logger;
@@ -19,7 +21,7 @@ let client;
 const DEFAULT_VALUES = {
     dotEnvFilePath: path.resolve(__dirname, '../.env'),
     rpcUrl: 'http://localhost:7546/',
-    numAccounts: 1,
+    numAccounts: 3,
     numAccountsMinimum: 1,
 };
 
@@ -62,78 +64,28 @@ ACCOUNT_${accountIndex}_EVM_ADDRESS=${account.evmAddress}
 ACCOUNT_${accountIndex}_ID=${account.id}
 `;
         return text;
-    }).join('\n\n');
+    }).join('\n');
     const output =
 `# This .env file stores credentials for Hedera Testnet only.
 # Do **not** reuse or share any credentials from Hedera Mainnet,
 # as this file is stored as plain text on disk,
 # and is therefore not secure enough.
 
+# BIP-39 seed phrase
+SEED_PHRASE="${seedPhrase}"
+NUM_ACCOUNTS=${numAccounts}
+
+# JSON-RPC endpoint
+RPC_URL=${rpcUrl}
+
 # Operator account
 OPERATOR_ACCOUNT_PRIVATE_KEY=${operatorAccount.privateKey}
 OPERATOR_ACCOUNT_EVM_ADDRESS=${operatorAccount.evmAddress}
 OPERATOR_ACCOUNT_ID=${operatorAccount.id}
 
-# BIP-39 seed phrase
-SEED_PHRASE="${seedPhrase}"
-NUM_ACCOUNTS=${numAccounts}
-
 ${accountsOutput}
-
-# JSON-RPC endpoint
-RPC_URL=${rpcUrl}
 `
     return output;
-}
-
-async function queryAccountByEvmAddress(evmAddress) {
-    let accountId;
-    let accountBalance;
-    let accountEvmAddress;
-    const accountFetchApiUrl =
-        `https://testnet.mirrornode.hedera.com/api/v1/accounts/${evmAddress}?limit=1&order=asc&transactiontype=cryptotransfer&transactions=false`;
-    logger.log('Fetching: ', accountFetchApiUrl);
-    try {
-        const accountFetch = await fetch(accountFetchApiUrl);
-        const accountObj = await accountFetch.json();
-        const account = accountObj;
-        accountId = account?.account;
-        accountBalance = account?.balance?.balance;
-        accountEvmAddress = account?.evm_address;
-    } catch (ex) {
-        // do nothing
-    }
-    return {
-        accountId,
-        accountBalance,
-        accountEvmAddress,
-    }
-}
-
-async function queryAccountByPrivateKey(privateKeyStr) {
-    const privateKeyObj = PrivateKey.fromStringECDSA(privateKeyStr);
-    const publicKey = `0x${ privateKeyObj.publicKey.toStringRaw() }`;
-    let accountId;
-    let accountBalance;
-    let accountEvmAddress;
-    const accountFetchApiUrl =
-        `https://testnet.mirrornode.hedera.com/api/v1/accounts?account.publickey=${publicKey}&balance=true&limit=1&order=desc`;
-    logger.log('Fetching: ', accountFetchApiUrl);
-    try {
-        const accountFetch = await fetch(accountFetchApiUrl);
-        const accountObj = await accountFetch.json();
-        const account = accountObj?.accounts[0];
-        accountId = account?.account;
-        accountBalance = account?.balance?.balance;
-        accountEvmAddress = account?.evm_address;
-    } catch (ex) {
-        // do nothing
-    }
-    return {
-        accountId,
-        accountBalance,
-        accountEvmAddress,
-    }
 }
 
 async function getUsableAccount(privateKeyStr, evmAddress) {
@@ -166,7 +118,6 @@ async function promptInputs() {
     // read in initial values for env variables that have been set
     dotenv.config({ path: DEFAULT_VALUES.dotEnvFilePath });
     const {
-        YOUR_NAME,
         OPERATOR_ACCOUNT_PRIVATE_KEY,
         SEED_PHRASE,
         NUM_ACCOUNTS,
@@ -194,42 +145,6 @@ async function promptInputs() {
     do {
         restart = false;
         let use1stAccountAsOperator = false;
-
-        // prompt for operator account private key
-        // - user may opt for "none" in which case the 1st account
-        //   generated from the BIP-39 seed phrase will be used instead
-        // - user may opt to specify an account private key
-        // - if private key is specified, validation will be performed,
-        //   and account ID will be obtained from there (no need to ask user to input)
-        logger.log('Enter your operator account (ECDSA) private key');
-        if (operatorKey) {
-            logger.log(`Current: "${operatorKey}"`);
-            logger.log('(enter blank to re-use the above value)');
-        } else {
-            logger.log('e.g. "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"');
-        }
-        logger.log('(enter "none" to use first account from BIP-39 seed phrase as operator account)');
-        const inputOperatorKey = await rlPrompt.question('> ');
-        if (inputOperatorKey === 'none') {
-            use1stAccountAsOperator = true;
-        } else {
-            operatorKey = inputOperatorKey || operatorKey;
-            if (!operatorKey) {
-                console.error('Must specify operator account private key');
-                restart = true;
-                continue;
-            }
-
-            // validate operator account details
-            try {
-                operatorAccount = await getUsableAccount(operatorKey);
-            } catch (ex) {
-                // Fail fast here, as we know this account is non-functional in its present state
-                console.error(ex.message);
-                restart = true;
-                continue;
-            }
-        }
 
         // prompt for BIP-39 seed phrase
         // - user may leave empty, and a new one will be generated at random
@@ -327,24 +242,57 @@ async function promptInputs() {
             rpcUrl = inputRpcUrl;
         }
 
+        // prompt for operator account private key
+        // - user may opt for "none" in which case the 1st account
+        //   generated from the BIP-39 seed phrase will be used instead
+        // - user may opt to specify an account private key
+        // - if private key is specified, validation will be performed,
+        //   and account ID will be obtained from there (no need to ask user to input)
+        logger.log('Enter your operator account (ECDSA) private key');
+        if (operatorKey) {
+            logger.log(`Current: "${operatorKey}"`);
+            logger.log('(enter blank to re-use the above value)');
+            logger.log('(enter "seed" use first account from BIP-39 seed phrase as operator account)');
+        } else {
+            logger.log('e.g. "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"');
+            logger.log('(enter blank to use first account from BIP-39 seed phrase as operator account)');
+        }
+        const inputOperatorKey = (await rlPrompt.question('> ')).trim();
+        if ((!operatorKey && inputOperatorKey === '') ||
+            inputOperatorKey === 'seed') {
+            use1stAccountAsOperator = true;
+            operatorKey = accounts[0].privateKey;
+        } else {
+            operatorKey = inputOperatorKey || operatorKey;
+        }
+        if (!operatorKey) {
+            console.error('Must specify operator account private key');
+            restart = true;
+            continue;
+        }
+
+        const operatorAccountPublicKey = PrivateKey.fromStringECDSA(operatorKey).publicKey;
+        console.log('operatorAccountPublicKey', operatorAccountPublicKey.toStringRaw());
+        const operatorAccountEvmAddress = '0x' + operatorAccountPublicKey.toEvmAddress();
+
+        // first, give user the opportunity to fund this account
+        logger.log(`Please ensure that you have funded ${operatorAccountEvmAddress}`);
+        logger.log('If this account has not yet been created or funded, you may do so via https://faucet.hedera.com');
+        logger.log('(Simply enter a blank value to when this account is ready)');
+        await rlPrompt.question('> '); // discard the response, no use for it
+
+        // validate operator account details
+        try {
+            operatorAccount = await getUsableAccount(operatorKey, operatorAccountEvmAddress);
+        } catch (ex) {
+            // Fail fast here, as we know this account is non-functional in its present state
+            console.error(ex.message);
+            restart = true;
+            continue;
+        }
+
         if (use1stAccountAsOperator) {
-            // first, give user the opportunity to fund this account
-            logger.log(`Please ensure that you have funded ${accounts[0].evmAddress}`);
-            logger.log('If this account has not yet been created or funded, you may do so via https://faucet.hedera.com');
-            logger.log('(Simply enter a blank value to when this account is ready)');
-            await rlPrompt.question('> '); // discard the response, no use for it
-
-            // validate operator account details
-            try {
-                operatorAccount = await getUsableAccount(accounts[0].privateKey, accounts[0].evmAddress);
-            } catch (ex) {
-                // Fail fast here, as we know this account is non-functional in its present state
-                console.error(ex.message);
-                restart = true;
-                continue;
-            }
-
-            accounts[0].id = operatorAccount.id;
+            accounts[0] = operatorAccount;
         }
 
         // prompt for user to overwrite the file `.env` file

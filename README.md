@@ -117,7 +117,6 @@ Steps:
 1. Submit EVM request over RPC to query token balance
 1. Summary metrics
 
-
 ## How to use this repo
 
 ### As a tutorial reader
