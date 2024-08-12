@@ -81,8 +81,10 @@ async function scriptTokenHtsHscsInterop() {
     const tokenHtsArtefacts = JSON.parse(tokenHtsArtefactsJson);
     const tokenEvmAddress = tokenHtsArtefacts.tokenEvmAddress;
     logger.log('Token HTS EVM address:', tokenEvmAddress);
-    const tokenEvmAddressHashScanURl = `https://hashscan.io/testnet/token/${tokenEvmAddress}`;
-    logger.log('Token HTS EVM address Hashscan URL:', tokenEvmAddress);
+    const tokenEvmAddressHashScanUrl = `https://hashscan.io/testnet/token/${tokenEvmAddress}`;
+    logger.log('Token HTS EVM address Hashscan URL:',
+        ...logger.applyAnsi('URL', tokenEvmAddressHashScanUrl),
+    );
 
     // obtain ERC20 ABI.
     // From tokenHscs script
