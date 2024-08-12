@@ -7,12 +7,17 @@ const { stdin, stdout } = require('node:process');
 const {
     Mnemonic,
     PrivateKey,
+    Client,
+    AccountCreateTransaction,
+    Hbar,
+    HbarUnit,
 } = require('@hashgraph/sdk');
 const dotenv = require('dotenv');
 const {
     createLogger,
     queryAccountByEvmAddress,
     queryAccountByPrivateKey,
+    CHARS,
 } = require('../util/util.js');
 
 let logger;
@@ -36,6 +41,7 @@ async function initDotEnvForApp() {
     const {
         allowOverwrite1stChar,
         dotEnvText,
+        accounts,
     } = await promptInputs();
 
     // write `.env` file if instructed
@@ -43,10 +49,12 @@ async function initDotEnvForApp() {
         logger.log('OK, overwriting .env file');
         const fileName = DEFAULT_VALUES.dotEnvFilePath;
         await fs.writeFile(fileName, dotEnvText);
-        logger.logComplete('Initialise .env file, overwrite - complete');
+        logger.log('Overwrite .env file');
     } else {
-        logger.logComplete('Initialise .env file, leave as-is - complete');
+        logger.log('Leave as-is .env file');
     }
+
+    logger.logComplete('Initialise .env file - complete');
 }
 
 function constructDotEnvFile({
@@ -295,6 +303,45 @@ async function promptInputs() {
             accounts[0] = operatorAccount;
         }
 
+        logger.logSection('Checking all accounts');
+        for (let idx = 0; idx < numAccounts; idx++) {
+            const account = accounts[idx];
+
+            // check that account exists
+            const { accountId } = await queryAccountByEvmAddress(account.evmAddress);
+            if (accountId) {
+                logger.log(`Account #${idx} exists:`, accountId);
+                account.id = accountId;
+                continue;
+            }
+
+            // if not, create that account
+            logger.log(`Account #${idx} does not exist, creating`, CHARS.HELLIP);
+
+            const operatorPrivateKeyObj = PrivateKey.fromStringECDSA(operatorAccount.privateKey);
+            if (!client) {
+                // lazily instantiate a client instance when first necessary
+                client = Client.forTestnet().setOperator(
+                    operatorAccount.id,
+                    operatorPrivateKeyObj,
+                );
+            }
+
+            const accountCreateTx = await new AccountCreateTransaction()
+                .setAlias(account.evmAddress)
+                .setKey(PrivateKey.fromStringECDSA(account.privateKey))
+                .setInitialBalance(new Hbar(10n, HbarUnit.Hbar))
+                .freezeWith(client);
+
+            const accountCreateTxSigned = await accountCreateTx.sign(operatorPrivateKeyObj);
+            const accountCreateTxSubmitted = await accountCreateTxSigned.execute(client);
+            const accountCreateTxReceipt = await accountCreateTxSubmitted.getReceipt(client);
+            account.id = accountCreateTxReceipt.accountId.toString();
+
+            logger.log(`Account #${idx} created:`, account.id);
+        }
+        client?.close();
+
         // prompt for user to overwrite the file `.env` file
         // - prints out the proposed file
         // - user may select "yes", "no", or "restart"
@@ -332,6 +379,6 @@ async function promptInputs() {
 }
 
 initDotEnvForApp().catch((ex) => {
-    client && client.close();
+    client?.close();
     logger ? logger.logError(ex) : console.error(ex);
 });
