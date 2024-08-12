@@ -2,7 +2,7 @@
 # To run on gitpod open https://gitpod.io/?autostart=false# followed by the github URL of your project
 # e.g. https://gitpod.io/?autostart=false#https://github.com/hedera-dev/hedera-tutorial-demo-base-template
 tasks:
-  - name: "rpcrelay_pull"
+  - name: "get_deps"
     init: |
       bash ./util/03-get-dependencies.sh
   - name: "rpcrelay_run"

@@ -1,81 +1,122 @@
-# Base Template for Hedera Tutorial Demo Repos
+# Hedera Tokens Tutorial CYOA
 
-Choose-your-own-Adventure to create Tokens on Hedera.
+Choose-your-own-Adventure: Mint and Transfer tokens the EVM way and the Hedera-native way.
 
 <a href="https://gitpod.io/?autostart=true&editor=code&workspaceClass=g1-standard#https://github.com/hedera-dev/hedera-tokens-cyoa-tutorial" target="_blank" rel="noreferrer">
   <img src="./img/gitpod-open-button.svg" />
 </a>
 
-## Features
+Create a fungible token using Hedera Token Service.
+Create an ERC20 token using Hedera Smart Contract Service.
+Discover how these 2 services can interoperate.
+This is a hands-on session - all you need are a browser and a github account.
 
-- Installation of bare minimum dependencies
-  - Hedera SDK + `.env` file parser
-- Script that automates setup of `.env` file
-  - Interactive prompts, with sensible defaults
-  - Accommodates BIP-39 seed phrase + faucet dispense flow
-    - This caters to EVM developers who wish to use their familiar developer tools
-  - Accommodates portal account create flow
-    - This caters to all developers in general (e.g. web2 developers)
-  - Performs basic validation of accounts
-    - Fail fast to prevent errors/ head scratching after beginning to do the tutorial
-- Script that automates initialisation and running of JSON-RPC relay
-  - Needed if tutorial involves the use of HSCS +
-    EVM developer tools (hardhat/ foundry/ ethers/ viem/ metamask/ et cetera)
-  - Otherwise, this is not necessary, and can be ignored/ or disabled by the tutorial author
-- Anonymised metrics collection on HCS
-  - Utility function provided to set up an HCS topic to log metrics to
-    - Intended to be invoked by tutorial creator, as a once-off
-  - Utility function provided to record events on said HCS topic
-    - Intended to be invoked by tutorial user, each time they run various scripts during the tutorial
-- Gitpod configuration
-  - Allows developer to run tutorial in a cloud development environment (Gitpod)
-  - Needed if developer is working from a non-POSIX compliant machine,
-    or is otherwise unable to meet the set up requirements in the pre-requisites
-  - Most likely needed if the developer is new to Hedera technology,
-    and the intended outcome is a quick turnaround - e.g. Hello World sequence, or POC
-  - Otherwise, this is not necessary, and can be ignored/ or disabled by the tutorial author
+## How to run
 
-## Focus
+1. Click on the "run on Gitpod" button above.
+1. Wait for Gitpod to load, this should take less than 10 seconds
+1. In the VS code terminal, you should see 3 terminals, `get_deps`, `rpcrelay_run`, and `main`
+1. You do not need to use the `get_deps` and `rpcrelay_run` terminals, let them run in the background
+1. In the `main` terminal, which is the one that displays by default, a script will interactively prompt you
+1. Congratulations, you can now move on to the sequences! 🎉
 
-These are the principles for this repo:
+## Sequences
 
-- Maximise setup automation
-- Minimise steps for developer
-- Shortest possible time before developer can work on first step in a tutorial
-- Anticipate and counter developer friction points
+This repo contains the code required for several different ways to create and transfer tokens on Hedera.
 
-The performance optimisation for speed can be quantified:
+### Setup script
 
-- *20-30 minutes*: Manual set up of prerequisites for an a developer new to Hedera technology
-- *5-6 minutes*: Set up via scripts from scratch
-- *1-2 minutes*: Set up via scripts with Docker image + Gitpod
-  - TODO: custom Docker image instead of base Docker image + steps each run, to further speed this up
-- *Immediate*: Time to start the first step in the script
-  - Note: The setup still takes 1-2 minutes, but runs in the background and in parallel by design,
-    allowing the developer to get on the tutorial steps right away
+What you will accomplish:
 
-Developer friction points anticipated include:
+1. Answer interactive prompts in a terminal to construct a `.env` file
+1. Generate accounts using a BIP-39 seed phrase (optional)
+1. Fund one of those accounts using the Hedera Testnet Faucet (optional)
 
-- Those identified through a developer friction audit conducted in 2023
-- Those identified through a developer usability test conducted in 2024
+Steps:
 
-## Motivation
+1. “Enter a BIP-39 seed phrase”
+   - Leave blank to accept the default, which is to generate a new seed phrase.
+   - Read more about [BIP-39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki)
+     and [BIP-44](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki).
+1. “Enter a number of accounts to generate from your BIP-39 seed phrase”
+   - Leave blank to accept the default, which is to generate several accounts.
+1. “Enter your preferred JSON-RPC endpoint URL”
+   - Leave blank to accept the default,
+   - This value defaults to something that matches the patterns`https://7546-*.gitpod.io/`
+1. “Enter your operator account (ECDSA) private key”
+   - Leave blank to accept the default, is to use the first account generated from the seed phrase from earlier.
+1. “Please ensure that you have funded ${EVM_ADDRESS}”
+   - The value of `${EVM_ADDRESS}` will be `0x` followed by hexadecimal characters - copy this value to your clipboard.
+   - If you are using this EVM address for the first time, you will need to fund it. Otherwise just hit `[return]` right away, and move to the next step.
+   - In a new browser window/ tab, visit [faucet.hedera.com](https://faucet.hedera.com).
+   - Paste the address into the text input field, press the “receive” button, pass the captcha challenge, press the “confirm” button, and wait for the transaction to complete.
+   - Switch back to the browser window/ tab with Gitpod running in it.
+   - Hit the `[return]` key
+1. “Do you wish to overwrite the .env file with the above?”
+   - Type “y”, and hit the `[return]`  key
 
-- A tutorial, at bare minimum, does the following:
-  - Lists the pre-requisites which the developer must set up/ satisfy on their computer before proceeding
-  - Guide its reader, step-by-step, how to complete a given task
-  - Link to a demo repo which demonstrates the task
-- This base template for demo repos goes beyond the bare minimum above:
-  - Automates the set up of the pre-requisites
-  - Provides a configuration for Gitpod, so that set up does not even need to be performed
-    by the developer on their own computer
-- What this achieves:
-  - Reduce developer friction
-  - Decrease the amount of time before developer can **start** the first step of the tutorial
-  - Decrease the amount of time in total for the developer to **complete** the tutorial
-- Main motivation here is **speed**:
-  - Faster = Less developer friction
-  - Faster = Larger fraction of developers complete the tutorial
+### Task (1) - HTS FungibleCommon token
+
+What you will accomplish:
+
+In this task, you will deploy a new fungible token on Hedera Token Service, and transfer it from one account to another.
+You will be using the Hedera SDK, and use Javascript.
+No Solidity or smart contracts necessary!
+
+Steps:
+
+1. cd tokenHts
+1. ./script [tab] [return]
+1. Initial output
+1. Configuring new HTS token
+1. Transaction for new HTS token
+1. Configuring token association
+1. Submitting token association transaction
+1. Configuring token transfer
+1. Submitting token transfer transaction
+1. Summary metrics
+
+### Task (2) - HSCS ERC20 token
+
+What you will accomplish:
+
+In this task, you will deploy a new fungible token on Hedera Token Service, and transfer it from one account to another.
+You will be using the Hedera SDK, and use Javascript.
+No Solidity or smart contracts necessary!
+
+Steps:
+
+1. cd tokenHscs
+1. ./script [tab] [return]
+1. Initial output
+1. Checking Solidity smart contract source code
+1. Loading EVM bytecode + ABI (solc outputs)
+1. Checking JSON-RPC endpoint liveness
+1. Submit EVM transaction over RPC to deploy bytecode
+1. Submit EVM transaction over RPC to transfer token balance
+1. Submit EVM request over RPC to query token balance
+1. Summary metrics
+
+### Task (3) - Interoperability between HSCS and HTS
+
+What you will accomplish:
+
+In this task, you will use the fungible token that you have previously deployed to Hedera Token Service, and interact with it via Hedera Smart Contract Service.
+You will be using viem and JSON-RPC to interact with the token, with interoperability provided through the HTS system contract.
+
+Steps:
+
+1. cd tokenInterop
+1. ./script [tab] [return]
+1. Reminder: Complete both the "tokenHts" and "tokenHscs" tasks before running this script
+1. Initial output
+1. Obtain EVM address of existing HTS fungible token
+1. Loading ABI (solc outputs)
+1. Checking JSON-RPC endpoint liveness
+1. Submit EVM transaction over RPC to transfer HTS token balance (HSCS interoperability)
+1. Submit EVM request over RPC to query token balance
+1. Summary metrics
+
 
 ## How to use this repo
 
@@ -150,53 +191,7 @@ Likewise also do not modify any files inside the `util` directory.
 
 ## TODOs
 
-For the client
-
-- [x] Replace `marker` with a custom logger
-  - Reduce clutter within the code
-  - Make the collection more systematic and standardised
-  - When `error` is logged, the HCS message should include a sequence number + hash of the message
-    - To make it easier to understand *where* the friction points are
-- [x] HCS message should include version number + git commit hash to be able to trace the version being run against
-- [x] Add defined categories to the metrics (strings to enums)
-  - Categories: `begin`, `complete`, and `error`
-- [x] Collect stats for first/last/count for each log category
-  - Persist in a file on disk such that it spans multiple runs of each script (in-memory won't work)
-- [x] Derive additional statistics using these categories
-  - [x] Timestamp difference between 1st `start` in setup to 1st `complete` in any task --> Quantify **time to hello world**
-  - [x] Timestamp difference between 1st `start` in setup to lat `complete` in any task --> Quantify **time to full completion**
-  - [x] Timestamp difference between 1st `start` in a task to 1st `complete` in the same task --> Quantify time taken to complete specific task for the first time
-  - [x] Timestamp difference between last `start` in a task to last `complete` in the same task --> Quantify the most recent time taken to complete specific task
-  - [x] Count of `error` occurrences between 1st instance of a `start`, and 1st instance of a `complete` in the same task --> Quantify number of friction points
-  - [x] Count of 1st instance of `start` without any corresponding `complete` for the same task --> Quantify the completion rate (and therefore drop-off rate)
-  - Note that number of friction points and completion rates are intended to be cross-referenced
-- [x] Display a subset of the statistics collected to the user
-  - Trigger 1: When a `complete` is hit in a script
-  - Trigger 2: Manually invoke a script within `init/`
-- [x] flag in `logger.json` file to turn off metrics logging on HCS - anonymised already
-- [x] add option to publish metrics summary
-- [x] summary output remove extra newline before the blue circle emoji
-- [x] idea: hit "enter" (readline prompt) to continue to next step for logger
-- [x] idea: automatically exit shell after docker pull of rpc relay image to reduce clutter
-- [x] update `.env.sample` file to include all fields eventually generated
-- [x] update `logger.json.sample` file to include all fields
-- [x] separate time taken to complete first run and time taken to complete most recent run
-- [x] different icons when logging start, complete, error, and summary
-- [x] fix ANSI codes for colour and add BRIGHT (`\x1b[1m`) to make headings bold
-- [x] make printed URLs blue and underlined to emphasise that they are clickable
-- [x] run tasks via `npx`
-- [x] logger config to disable ANSI
-- [x] npx bin script with `update` and `scaffold-task` sub-commands
-- [x] initialise metrics script also auto-updates config in `logger.json.sample`
-- [ ] ideate: commemorative completion task reward
-
-For a server/ CLI tool
-
-- [ ] Ingest HCS topic with these messages
-- [ ] Include simple queries for the above 4 metrics
-- [ ] Output a information that can be plugged into a dashboard
-- [ ] Capability to handle/ span Testnet resets
-- [ ] Separate into different repo/ npm package from the base template
+[ ] - TODO
 
 ## Author
 
