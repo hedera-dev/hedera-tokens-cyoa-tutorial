@@ -46,6 +46,14 @@ const CHARS = {
 };
 const hashSha256 = crypto.createHash('sha256');
 
+async function getVersionStamp() {
+    // obtain package.json version number and git commit hash
+    const gitRefsHeadMain = await fs.readFile(DEFAULT_VALUES.gitRefsHeadMainFilePath);
+    const gitCommitHash = gitRefsHeadMain.toString().trim().substring(0, 8);
+    const versionStamp = `${packageJson.version}-${gitCommitHash}`;
+    return versionStamp;
+}
+
 async function createLogger({
     scriptId,
     scriptCategory,
@@ -60,11 +68,7 @@ async function createLogger({
     if (['setup', 'task'].indexOf(scriptCategory) < 0) {
         throw new Error('Invalid script category');
     }
-
-    // obtain package.json version number and git commit hash
-    const gitRefsHeadMain = await fs.readFile(DEFAULT_VALUES.gitRefsHeadMainFilePath);
-    const gitCommitHash = gitRefsHeadMain.toString().trim().substring(0, 8);
-    const version = `${packageJson.version}-${gitCommitHash}`;
+    const version = await getVersionStamp();
     console.log(`${scriptCategory} ${scriptId} ${version}`);
 
     // read previous stats collected for this script, if any
@@ -590,6 +594,64 @@ async function queryAccountByPrivateKey(privateKeyStr) {
     }
 }
 
+function getAbiSummary(abi) {
+    const abiByType = new Map();
+    abi.forEach((item) => {
+        const abiTypeList = abiByType.get(item.type) || [];
+        abiTypeList.push(item.name || '(unnamed)');
+        abiByType.set(item.type, abiTypeList);
+    });
+    return [...abiByType.entries()].map(([type, list]) => {
+        const listNames = list.join(', ');
+        return `${type} (${list.length}): ${listNames}`;
+    }).join('\n');
+}
+
+async function verifyOnSourcify({
+    deploymentAddress,
+    deploymentTxHash,
+    deploymentContractName,
+    solidityFile,
+    metadataFile,
+}) {
+    const sourcifyEndpoint = 'https://server-verify.hashscan.io/verify'
+
+    const metadataFileName = path.basename(metadataFile);
+    const solidityFileName = path.basename(solidityFile);
+    const metadataFileContents = await fs.readFile(metadataFile);
+    const solidityFileContents = await fs.readFile(solidityFile);
+
+    const postBody = {
+        chain: '296',
+        address: deploymentAddress,
+        creatorTxHash: deploymentTxHash,
+        chosenContract: deploymentContractName,
+        files: {
+            [metadataFileName]: metadataFileContents.toString(),
+            [solidityFileName]: solidityFileContents.toString(),
+        },
+    };
+
+    console.log(`Sending verification request for ${solidityFileName} to ${sourcifyEndpoint}:`);
+
+    const fetchRequest = await fetch(sourcifyEndpoint, {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(postBody),
+    });
+    const fetchResponse = await fetchRequest.json();
+    if (fetchResponse.error) {
+        console.error(fetchResponse);
+    } else if (fetchResponse.result) {
+        fetchResponse.result.forEach((verifyResult) => {
+            console.log(`Contract ${verifyResult.address} verification status: ${verifyResult.status}`);
+        });
+    }
+}
+
 async function metricsTopicCreate(logger, metricsHcsTopicMemo) {
     const {
         client,
@@ -692,6 +754,7 @@ module.exports = {
     ANSI,
     CHARS,
     displayDuration,
+    getVersionStamp,
     createLogger,
     writeLoggerFile,
     logMetricsSummary,
@@ -699,5 +762,7 @@ module.exports = {
     convertTransactionIdForMirrorNodeApi,
     queryAccountByEvmAddress,
     queryAccountByPrivateKey,
+    getAbiSummary,
+    verifyOnSourcify,
     metricsTopicCreate,
 };
