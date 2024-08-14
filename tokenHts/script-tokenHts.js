@@ -56,10 +56,10 @@ async function scriptTokenHts() {
         .setTokenName(`${logger.scriptId} coin`)
         // Set the token symbol
         .setTokenSymbol(logger.scriptId.toUpperCase())
-        // Set the token decimals to 2
-        .setDecimals(2)
         // Set the initial supply of the token to 1,000,000
         .setInitialSupply(1_000_000)
+        // Set the token decimals to 2, so there will be 10,000.00 tokens
+        .setDecimals(2)
         // Configure token access permissions: treasury account, admin, freezing
         .setTreasuryAccountId(operatorId)
         // Set the admin key of the the token to the operator account

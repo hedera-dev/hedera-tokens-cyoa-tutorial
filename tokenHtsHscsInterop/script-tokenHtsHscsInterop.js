@@ -12,6 +12,7 @@ import dotenv from 'dotenv';
 import {
     CHARS,
     createLogger,
+    getAbiSummary,
 } from '../util/util.js';
 
 const logger = await createLogger({
@@ -93,9 +94,7 @@ async function scriptTokenHtsHscsInterop() {
     const myTokenAbiStr = await fs.readFile(`${solidityFileNamePrefix}MyToken.abi`, { encoding: 'utf8' });
     logger.log('Compiled smart contract ABI string:', myTokenAbiStr.substring(0, 32), CHARS.HELLIP);
     const myTokenAbi = JSON.parse(myTokenAbiStr);
-    logger.log('Compiled smart contract ABI parse:\n', myTokenAbi.map((item) => {
-        return `- ${item.type}: "${item.name || ''}"`;
-    }).join('\n'));
+    logger.log('Compiled smart contract ABI summary:\n', getAbiSummary(myTokenAbi));
 
     // test that JSON-RPC endpoint is live
     await logger.logSectionWithWaitPrompt('Checking JSON-RPC endpoint liveness');

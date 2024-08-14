@@ -8,6 +8,7 @@
     },
     "scripts": {
         "test": "echo 'no tests yet'",
-        "compile-smart-contract": "solcjs --abi --bin my_token.sol"
+        "compile-smart-contract": "solcjs --abi --bin my_token.sol",
+        "metadata-smart-contract": "solc --output-dir solc-out --overwrite --pretty-json --json-indent 2 --metadata my_token.sol && jq < solc-out/MyToken_meta.json > my_token.metadata.json"
     }
 }

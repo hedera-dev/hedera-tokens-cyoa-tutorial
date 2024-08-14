@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import fs from 'node:fs/promises';
+import path from 'node:path';
 import {
     createWalletClient,
     http,
@@ -12,6 +13,8 @@ import dotenv from 'dotenv';
 import {
     CHARS,
     createLogger,
+    getAbiSummary,
+    verifyOnSourcify,
 } from '../util/util.js';
 
 const logger = await createLogger({
@@ -75,9 +78,7 @@ async function scriptTokenHscs() {
     logger.log('Compiled smart contract ABI string:', myTokenAbiStr.substring(0, 32), CHARS.HELLIP);
     logger.log('Compiled smart contract EVM bytecode:', myTokenEvmBytecode.substring(0, 32), CHARS.HELLIP);
     const myTokenAbi = JSON.parse(myTokenAbiStr);
-    logger.log('Compiled smart contract ABI parse:\n', myTokenAbi.map((item) => {
-        return `- ${item.type}: "${item.name || ''}"`;
-    }).join('\n'));
+    logger.log('Compiled smart contract ABI summary:\n', getAbiSummary(myTokenAbi));
 
     // check JSON-RPC relay
     await logger.logSectionWithWaitPrompt('Checking JSON-RPC endpoint liveness');
@@ -120,6 +121,14 @@ async function scriptTokenHscs() {
         'Deployment address Hashscan URL:\n',
         ...logger.applyAnsi('URL', deployAddressHashscanUrl),
     );
+
+    // Verify
+    await logger.logSectionWithWaitPrompt('Verify smart contract via Sourcify');
+    await verifyOnSourcify({
+        deploymentAddress: deployAddress,
+        solidityFile: path.resolve('my_token.sol'),
+        metadataFile: path.resolve('my_token.metadata.json'),
+    });
 
     // EVM transfer transaction via viem
     await logger.logSectionWithWaitPrompt('Submit EVM transaction over RPC to transfer token balance');
