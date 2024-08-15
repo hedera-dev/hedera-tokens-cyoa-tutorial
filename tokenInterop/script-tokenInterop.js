@@ -16,12 +16,12 @@ import {
 } from '../util/util.js';
 
 const logger = await createLogger({
-    scriptId: 'tokenHtsHscsInterop',
+    scriptId: 'tokenInterop',
     scriptCategory: 'task',
 });
 
-async function scriptTokenHtsHscsInterop() {
-    logger.logStart('Welcome to the tokenHtsHscsInterop task!');
+async function scriptTokenInterop() {
+    logger.logStart('Welcome to the tokenInterop task!');
 
     // Read in environment variables from `.env` file in parent directory
     dotenv.config({ path: '../.env' });
@@ -144,9 +144,9 @@ async function scriptTokenHtsHscsInterop() {
     });
     logger.log('Balance of query result:', queryResult);
 
-    logger.logComplete('tokenHtsHscsInterop task complete!');
+    logger.logComplete('tokenInterop task complete!');
 }
 
-scriptTokenHtsHscsInterop().catch((ex) => {
+scriptTokenInterop().catch((ex) => {
     logger ? logger.logError(ex) : console.error(ex);
 });
