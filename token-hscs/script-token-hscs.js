@@ -85,7 +85,7 @@ async function scriptTokenHscs() {
     const [blockNumber, balance] = await Promise.all([
         client.getBlockNumber(),
         client.getBalance({
-            address: '0x7394111093687e9710b7a7aeba3ba0f417c54474',
+            address: operatorEvmAddressStr,
         }),
     ]);
     logger.log('block number', blockNumber);
