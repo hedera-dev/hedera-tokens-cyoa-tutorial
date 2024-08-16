@@ -192,7 +192,7 @@ Likewise also do not modify any files inside the `util` directory.
 
 In this repo
 
-- [ ] change dir names from camelCase to snake-case
+- [x] change dir names from camelCase to snake-case
 - [ ] change address used in the RPC liveness check to use the operator account
 - [ ] when printing partial file, add `(truncated)` after `...`
 
