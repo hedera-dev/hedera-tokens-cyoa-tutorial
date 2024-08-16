@@ -198,14 +198,14 @@ In this repo
 
 Upstream, in base template
 
-- [ ] output the file and line number for each section in the terminal output
-- [ ] add another type of section heading for reminder
+- [x] output the file and line number for each section in the terminal output
+- [x] add another type of section heading for reminder
 
 In accompanying written tutorial
 
-- [ ] copy the section headings within written tutorial
-- [ ] use emojis to indicate actions within the written tutorial
-- [ ] add explanation for  numbers in the ABI summary (count)
+- [x] copy the section headings within written tutorial
+- [x] use emojis to indicate actions within the written tutorial
+- [x] add explanation for  numbers in the ABI summary (count)
 
 ## Author
 

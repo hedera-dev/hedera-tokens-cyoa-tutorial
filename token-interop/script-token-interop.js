@@ -71,7 +71,7 @@ async function scriptTokenInterop() {
     // }
 
     // Remind dev to complete both tokenHts and tokenHscs scripts
-    await logger.logSectionWithWaitPrompt('Reminder: Complete both the "token-hts" and "token-hscs" tasks before running this script');
+    await logger.logReminder('Reminder: Complete both the "token-hts" and "token-hscs" tasks before running this script');
 
     // obtain the HTS fungible token's token ID, and convert to address.
     // From tokenHts script
