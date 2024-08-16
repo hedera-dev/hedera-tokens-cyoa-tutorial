@@ -194,7 +194,7 @@ In this repo
 
 - [x] change dir names from camelCase to snake-case
 - [x] change address used in the RPC liveness check to use the operator account
-- [ ] when printing partial file, add `(truncated)` after `...`
+- [x] when printing partial file, add `(truncated)` after `...`
 
 Upstream, in base template
 

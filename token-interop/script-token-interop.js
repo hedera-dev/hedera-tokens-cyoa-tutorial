@@ -78,7 +78,7 @@ async function scriptTokenInterop() {
     await logger.logSectionWithWaitPrompt('Obtain EVM address of existing HTS fungible token');
     const tokenHtsArtefactsFile = path.resolve('../token-hts', 'artefacts.json');
     const tokenHtsArtefactsJson = await fs.readFile(tokenHtsArtefactsFile, { encoding: 'utf8' });
-    logger.log('Token HTS artefacts:', tokenHtsArtefactsJson.substring(0, 32), CHARS.HELLIP);
+    logger.log('Token HTS artefacts:', tokenHtsArtefactsJson.substring(0, 32), CHARS.HELLIP + '(truncated)');
     const tokenHtsArtefacts = JSON.parse(tokenHtsArtefactsJson);
     const tokenEvmAddress = tokenHtsArtefacts.tokenEvmAddress;
     logger.log('Token HTS EVM address:', tokenEvmAddress);
@@ -92,7 +92,7 @@ async function scriptTokenInterop() {
     await logger.logSectionWithWaitPrompt('Loading ABI (solc outputs)');
     const solidityFileNamePrefix = path.resolve('../token-hscs', 'my_token_sol_');
     const myTokenAbiStr = await fs.readFile(`${solidityFileNamePrefix}MyToken.abi`, { encoding: 'utf8' });
-    logger.log('Compiled smart contract ABI string:', myTokenAbiStr.substring(0, 32), CHARS.HELLIP);
+    logger.log('Compiled smart contract ABI string:', myTokenAbiStr.substring(0, 32), CHARS.HELLIP + '(truncated)');
     const myTokenAbi = JSON.parse(myTokenAbiStr);
     logger.log('Compiled smart contract ABI summary:\n', getAbiSummary(myTokenAbi));
 
