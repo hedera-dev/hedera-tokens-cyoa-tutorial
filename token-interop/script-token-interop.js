@@ -71,14 +71,14 @@ async function scriptTokenInterop() {
     // }
 
     // Remind dev to complete both tokenHts and tokenHscs scripts
-    await logger.logSectionWithWaitPrompt('Reminder: Complete both the "tokenHts" and "tokenHscs" tasks before running this script');
+    await logger.logReminder('Reminder: Complete both the "token-hts" and "token-hscs" tasks before running this script');
 
     // obtain the HTS fungible token's token ID, and convert to address.
     // From tokenHts script
     await logger.logSectionWithWaitPrompt('Obtain EVM address of existing HTS fungible token');
-    const tokenHtsArtefactsFile = path.resolve('../tokenHts', 'artefacts.json');
+    const tokenHtsArtefactsFile = path.resolve('../token-hts', 'artefacts.json');
     const tokenHtsArtefactsJson = await fs.readFile(tokenHtsArtefactsFile, { encoding: 'utf8' });
-    logger.log('Token HTS artefacts:', tokenHtsArtefactsJson.substring(0, 32), CHARS.HELLIP);
+    logger.log('Token HTS artefacts:', tokenHtsArtefactsJson.substring(0, 32), CHARS.HELLIP + '(truncated)');
     const tokenHtsArtefacts = JSON.parse(tokenHtsArtefactsJson);
     const tokenEvmAddress = tokenHtsArtefacts.tokenEvmAddress;
     logger.log('Token HTS EVM address:', tokenEvmAddress);
@@ -90,9 +90,9 @@ async function scriptTokenInterop() {
     // obtain ERC20 ABI.
     // From tokenHscs script
     await logger.logSectionWithWaitPrompt('Loading ABI (solc outputs)');
-    const solidityFileNamePrefix = path.resolve('../tokenHscs', 'my_token_sol_');
+    const solidityFileNamePrefix = path.resolve('../token-hscs', 'my_token_sol_');
     const myTokenAbiStr = await fs.readFile(`${solidityFileNamePrefix}MyToken.abi`, { encoding: 'utf8' });
-    logger.log('Compiled smart contract ABI string:', myTokenAbiStr.substring(0, 32), CHARS.HELLIP);
+    logger.log('Compiled smart contract ABI string:', myTokenAbiStr.substring(0, 32), CHARS.HELLIP + '(truncated)');
     const myTokenAbi = JSON.parse(myTokenAbiStr);
     logger.log('Compiled smart contract ABI summary:\n', getAbiSummary(myTokenAbi));
 
@@ -101,7 +101,7 @@ async function scriptTokenInterop() {
     const [blockNumber, balance] = await Promise.all([
         client.getBlockNumber(),
         client.getBalance({
-            address: '0x7394111093687e9710b7a7aeba3ba0f417c54474',
+            address: operatorEvmAddressStr,
         }),
     ]);
     logger.log('block number', blockNumber);

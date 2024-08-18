@@ -68,15 +68,15 @@ async function scriptTokenHscs() {
     // Solidity ERC20 minimal impl
     await logger.logSectionWithWaitPrompt('Checking Solidity smart contract source code');
     const myTokenSource = await fs.readFile(`my_token.sol`, { encoding: 'utf8' });
-    logger.log('Source code smart contract Solidity:', myTokenSource.substring(0, 32), CHARS.HELLIP);
+    logger.log('Source code smart contract Solidity:', myTokenSource.substring(0, 32), CHARS.HELLIP + '(truncated)');
 
     // solc compile + generate ABI
     await logger.logSectionWithWaitPrompt('Loading EVM bytecode + ABI (solc outputs)');
     const solidityFileNamePrefix = 'my_token_sol_';
     const myTokenAbiStr = await fs.readFile(`${solidityFileNamePrefix}MyToken.abi`, { encoding: 'utf8' });
     const myTokenEvmBytecode = await fs.readFile(`${solidityFileNamePrefix}MyToken.bin`, { encoding: 'utf8' });
-    logger.log('Compiled smart contract ABI string:', myTokenAbiStr.substring(0, 32), CHARS.HELLIP);
-    logger.log('Compiled smart contract EVM bytecode:', myTokenEvmBytecode.substring(0, 32), CHARS.HELLIP);
+    logger.log('Compiled smart contract ABI string:', myTokenAbiStr.substring(0, 32), CHARS.HELLIP + '(truncated)');
+    logger.log('Compiled smart contract EVM bytecode:', myTokenEvmBytecode.substring(0, 32), CHARS.HELLIP + '(truncated)');
     const myTokenAbi = JSON.parse(myTokenAbiStr);
     logger.log('Compiled smart contract ABI summary:\n', getAbiSummary(myTokenAbi));
 
@@ -85,7 +85,7 @@ async function scriptTokenHscs() {
     const [blockNumber, balance] = await Promise.all([
         client.getBlockNumber(),
         client.getBalance({
-            address: '0x7394111093687e9710b7a7aeba3ba0f417c54474',
+            address: operatorEvmAddressStr,
         }),
     ]);
     logger.log('block number', blockNumber);

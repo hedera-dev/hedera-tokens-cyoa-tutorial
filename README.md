@@ -190,7 +190,22 @@ Likewise also do not modify any files inside the `util` directory.
 
 ## TODOs
 
-[ ] - TODO
+In this repo
+
+- [x] change dir names from camelCase to snake-case
+- [x] change address used in the RPC liveness check to use the operator account
+- [x] when printing partial file, add `(truncated)` after `...`
+
+Upstream, in base template
+
+- [x] output the file and line number for each section in the terminal output
+- [x] add another type of section heading for reminder
+
+In accompanying written tutorial
+
+- [x] copy the section headings within written tutorial
+- [x] use emojis to indicate actions within the written tutorial
+- [x] add explanation for  numbers in the ABI summary (count)
 
 ## Author
 

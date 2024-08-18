@@ -49,6 +49,7 @@ const CHARS = {
   COMPLETE: '🎉',
   ERROR: '❌',
   SUMMARY: '🔢',
+  REMINDER: '🧐',
 };
 
 async function getVersionStamp() {
@@ -115,6 +116,7 @@ async function createLogger({
     log,
     logSection,
     logSectionWithWaitPrompt,
+    logReminder,
     logStart,
     logComplete,
     logCompleteWithoutClose,
@@ -145,6 +147,20 @@ async function createLogger({
 
   async function logSectionWithWaitPrompt(...strings) {
     const retVal = logSection(...strings);
+    const stackLine = new Error()?.stack
+      ?.split('at ')?.[2]
+      ?.trim()
+      ?.split(' ')?.[1]
+      ?.slice(1, -1)
+      ?.trim();
+    stackLine && console.log('↪️', stackLine);
+    await logWaitPrompt();
+    return retVal;
+  }
+
+  async function logReminder(...strings) {
+    console.log();
+    const retVal = log(...logger.applyAnsi('REMINDER', ...strings));
     await logWaitPrompt();
     return retVal;
   }
@@ -312,6 +328,13 @@ async function createLogger({
       case 'SECTION':
         return [
           CHARS.SECTION + ANSI.BRIGHT + ANSI.FG_PURPLE,
+          ...strings,
+          ANSI.RESET,
+          CHARS.HELLIP,
+        ];
+      case 'REMINDER':
+        return [
+          CHARS.REMINDER + ANSI.BRIGHT + ANSI.FG_CYAN,
           ...strings,
           ANSI.RESET,
           CHARS.HELLIP,
