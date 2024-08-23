@@ -66,12 +66,12 @@ async function scriptTokenHscs() {
     logger.log('Using RPC endpoint:', rpcUrlHederatestnet);
 
     // Solidity ERC20 minimal impl
-    await logger.logSectionWithWaitPrompt('Checking Solidity smart contract source code');
+    await logger.logSection('Checking Solidity smart contract source code');
     const myTokenSource = await fs.readFile(`my_token.sol`, { encoding: 'utf8' });
     logger.log('Source code smart contract Solidity:', myTokenSource.substring(0, 32), CHARS.HELLIP + '(truncated)');
 
     // solc compile + generate ABI
-    await logger.logSectionWithWaitPrompt('Loading EVM bytecode + ABI (solc outputs)');
+    await logger.logSection('Loading EVM bytecode + ABI (solc outputs)');
     const solidityFileNamePrefix = 'my_token_sol_';
     const myTokenAbiStr = await fs.readFile(`${solidityFileNamePrefix}MyToken.abi`, { encoding: 'utf8' });
     const myTokenEvmBytecode = await fs.readFile(`${solidityFileNamePrefix}MyToken.bin`, { encoding: 'utf8' });
@@ -81,7 +81,7 @@ async function scriptTokenHscs() {
     logger.log('Compiled smart contract ABI summary:\n', getAbiSummary(myTokenAbi));
 
     // check JSON-RPC relay
-    await logger.logSectionWithWaitPrompt('Checking JSON-RPC endpoint liveness');
+    await logger.logSection('Checking JSON-RPC endpoint liveness');
     const [blockNumber, balance] = await Promise.all([
         client.getBlockNumber(),
         client.getBalance({
@@ -92,7 +92,7 @@ async function scriptTokenHscs() {
     logger.log('balance', balance);
 
     // EVM deployment transaction via viem
-    await logger.logSectionWithWaitPrompt('Submit EVM transaction over RPC to deploy bytecode');
+    await logger.logSection('Submit EVM transaction over RPC to deploy bytecode');
     const deployTxHash = await client.deployContract({
         abi: myTokenAbi,
         bytecode: myTokenEvmBytecode,
@@ -123,7 +123,7 @@ async function scriptTokenHscs() {
     );
 
     // Verify
-    await logger.logSectionWithWaitPrompt('Verify smart contract via Sourcify');
+    await logger.logSection('Verify smart contract via Sourcify');
     await verifyOnSourcify({
         deploymentAddress: deployAddress,
         solidityFile: path.resolve('my_token.sol'),
@@ -131,7 +131,7 @@ async function scriptTokenHscs() {
     });
 
     // EVM transfer transaction via viem
-    await logger.logSectionWithWaitPrompt('Submit EVM transaction over RPC to transfer token balance');
+    await logger.logSection('Submit EVM transaction over RPC to transfer token balance');
     // function transfer(address to, uint256 amount) external returns (bool);
     const transferTxHash = await client.writeContract({
         address: deployAddress,
@@ -155,7 +155,7 @@ async function scriptTokenHscs() {
     logger.log('Transfer transaction receipt status:', transferTxReceipt.status);
 
     // EVM balance query via viem
-    await logger.logSectionWithWaitPrompt('Submit EVM request over RPC to query token balance');
+    await logger.logSection('Submit EVM request over RPC to query token balance');
     // function balanceOf(address account) external view returns (uint256);
     const queryResult = await client.readContract({
         address: deployAddress,

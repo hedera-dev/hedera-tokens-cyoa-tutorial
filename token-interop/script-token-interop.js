@@ -63,19 +63,12 @@ async function scriptTokenInterop() {
     logger.log('Using account:', operatorEvmAddressStr);
     logger.log('Using RPC endpoint:', rpcUrlHederatestnet);
 
-    // await logger.logSectionWithWaitPrompt('Running the main part of the script');
-    // logger.log('Doing something that takes 1 second.');
-    // await (new Promise((resolve) => { setTimeout(resolve, 1_000) }));
-    // if (!!true) {
-    //     throw new Error('Demo error, this was inevitable!');
-    // }
-
     // Remind dev to complete both tokenHts and tokenHscs scripts
     await logger.logReminder('Reminder: Complete both the "token-hts" and "token-hscs" tasks before running this script');
 
     // obtain the HTS fungible token's token ID, and convert to address.
     // From tokenHts script
-    await logger.logSectionWithWaitPrompt('Obtain EVM address of existing HTS fungible token');
+    await logger.logSection('Obtain EVM address of existing HTS fungible token');
     const tokenHtsArtefactsFile = path.resolve('../token-hts', 'artefacts.json');
     const tokenHtsArtefactsJson = await fs.readFile(tokenHtsArtefactsFile, { encoding: 'utf8' });
     logger.log('Token HTS artefacts:', tokenHtsArtefactsJson.substring(0, 32), CHARS.HELLIP + '(truncated)');
@@ -89,7 +82,7 @@ async function scriptTokenInterop() {
 
     // obtain ERC20 ABI.
     // From tokenHscs script
-    await logger.logSectionWithWaitPrompt('Loading ABI (solc outputs)');
+    await logger.logSection('Loading ABI (solc outputs)');
     const solidityFileNamePrefix = path.resolve('../token-hscs', 'my_token_sol_');
     const myTokenAbiStr = await fs.readFile(`${solidityFileNamePrefix}MyToken.abi`, { encoding: 'utf8' });
     logger.log('Compiled smart contract ABI string:', myTokenAbiStr.substring(0, 32), CHARS.HELLIP + '(truncated)');
@@ -97,7 +90,7 @@ async function scriptTokenInterop() {
     logger.log('Compiled smart contract ABI summary:\n', getAbiSummary(myTokenAbi));
 
     // test that JSON-RPC endpoint is live
-    await logger.logSectionWithWaitPrompt('Checking JSON-RPC endpoint liveness');
+    await logger.logSection('Checking JSON-RPC endpoint liveness');
     const [blockNumber, balance] = await Promise.all([
         client.getBlockNumber(),
         client.getBalance({
@@ -109,7 +102,7 @@ async function scriptTokenInterop() {
 
     // perform transfer of the HTS fungible token
     // by invoking the ERC20 ABI's transfer function on HSCS via viem
-    await logger.logSectionWithWaitPrompt('Submit EVM transaction over RPC to transfer HTS token balance (HSCS interoperability)');
+    await logger.logSection('Submit EVM transaction over RPC to transfer HTS token balance (HSCS interoperability)');
 
     // function transfer(address to, uint256 amount) external returns (bool);
     const transferTxHash = await client.writeContract({
@@ -134,7 +127,7 @@ async function scriptTokenInterop() {
     logger.log('Transfer transaction receipt status:', transferTxReceipt.status);
 
     // EVM balance query via viem
-    await logger.logSectionWithWaitPrompt('Submit EVM request over RPC to query token balance');
+    await logger.logSection('Submit EVM request over RPC to query token balance');
     // function balanceOf(address account) external view returns (uint256);
     const queryResult = await client.readContract({
         address: tokenEvmAddress,

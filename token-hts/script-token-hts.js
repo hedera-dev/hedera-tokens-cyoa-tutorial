@@ -46,7 +46,7 @@ async function scriptTokenHts() {
     logger.log('Using account:', operatorIdStr);
 
     // NOTE: Create a HTS token
-    await logger.logSectionWithWaitPrompt('Configuring new HTS token');
+    await logger.logSection('Configuring new HTS token');
     const tokenCreateTx = await new TokenCreateTransaction()
         //Set the transaction memo
         .setTransactionMemo(`Fungible Tokens CYOA create - ${logger.version}`)
@@ -76,7 +76,7 @@ async function scriptTokenHts() {
     logger.log('The token create transaction ID: ',
         tokenCreateTxId.toString());
 
-    await logger.logSectionWithWaitPrompt('Transaction for new HTS token');
+    await logger.logSection('Transaction for new HTS token');
     // Sign the transaction with the account key that will be paying for this transaction
     // const tokenCreateTxSigned = await tokenCreateTx.sign(operatorKey);
     const tokenCreateTxSig1 = operatorKey.signTransaction(tokenCreateTx);
@@ -111,7 +111,7 @@ async function scriptTokenHts() {
     logger.log('Artefacts saved to file:', artefactsFile, artefacts);
 
     // TokenAssociateTransaction
-    await logger.logSectionWithWaitPrompt('Configuring token association');
+    await logger.logSection('Configuring token association');
     // NOTE "INVALID_ACCOUNT_ID" when using EVM address
     // instead of S.R.N. format for account ID,
     // hence the need to use `queryAccountByEvmAddress` below.
@@ -129,7 +129,7 @@ async function scriptTokenHts() {
     const assocTxId = assocTx.transactionId;
     logger.log('The token association transaction ID:', assocTxId.toString());
 
-    await logger.logSectionWithWaitPrompt('Submitting token association transaction');
+    await logger.logSection('Submitting token association transaction');
     // Sign the transaction with the account that is being debited (operator account)
     // and the transaction fee payer account (operator account)
     // Since the account that is being debited and the account that is paying for
@@ -150,7 +150,7 @@ async function scriptTokenHts() {
     logger.log('View on Hashscan:\n', ...logger.applyAnsi('URL', assocTxHashScanUrl));
 
     // TransferTransaction
-    await logger.logSectionWithWaitPrompt('Configuring token transfer');
+    await logger.logSection('Configuring token transfer');
     // NOTE "NO_REMAINING_AUTOMATIC_ASSOCIATIONS" when using EVM address
     // here means that TokenAssociateTransaction above did not work.
     const transferTx = await new TransferTransaction()
@@ -166,7 +166,7 @@ async function scriptTokenHts() {
     const transferTxId = transferTx.transactionId;
     logger.log('The transfer transaction ID:', transferTxId.toString());
 
-    await logger.logSectionWithWaitPrompt('Submitting token transfer transaction');
+    await logger.logSection('Submitting token transfer transaction');
     // Sign the transaction with the account that is being debited (operator account)
     // and the transaction fee payer account (operator account)
     // Since the account that is being debited and the account that is paying for
