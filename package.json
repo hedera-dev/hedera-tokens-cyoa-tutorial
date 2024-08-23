@@ -1,6 +1,6 @@
 {
   "name": "hedera-tokens-cyoa-tutorial",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Choose-your-own-Adventure to create Tokens on Hedera",
   "main": "init.js",
   "scripts": {
