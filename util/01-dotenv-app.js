@@ -17,6 +17,7 @@ const {
   createLogger,
   queryAccountByEvmAddress,
   queryAccountByPrivateKey,
+  isHexPrivateKey,
   CHARS,
 } = require('../util/util.js');
 
@@ -102,7 +103,7 @@ async function getUsableAccount(privateKeyStr, evmAddress) {
   let { accountId, accountBalance, accountEvmAddress } = account;
   if (!accountId) {
     throw new Error(
-      'Must specify an account which exists, and can be derived from the specified private key',
+      'Must specify an account which exists, and can be derived from the specified ECDSA secp256k1 private key',
     );
   }
   if (!accountBalance) {
@@ -141,6 +142,17 @@ async function promptInputs() {
   // to allow for correction before proceeding
   let restart;
   do {
+    if (restart) {
+      console.error(
+        "\n❌ Invalid input values detected, the '.env' file has not been initialised.",
+      );
+      logger.log('Restarting the interactive prompts', CHARS.HELLIP);
+    }
+    logger.logSectionWithoutWaitPrompt(
+      'Please enter values requested, or accept defaults, in the interactive prompts below.',
+    );
+    logger.log("These will be used to initialise the '.env' file.\n");
+
     restart = false;
     let use1stAccountAsOperator = false;
 
@@ -173,7 +185,9 @@ async function promptInputs() {
         isValidatedSeedPhrase = false;
       }
       if (!isValidatedSeedPhrase) {
-        console.error('Specified input is not a valid BIP-39 seed phrase');
+        await logger.logError(
+          'Specified input is not a valid BIP-39 seed phrase',
+        );
         restart = true;
         continue;
       }
@@ -248,7 +262,10 @@ async function promptInputs() {
     // - user may opt to specify an account private key
     // - if private key is specified, validation will be performed,
     //   and account ID will be obtained from there (no need to ask user to input)
-    logger.log('Enter your operator account (ECDSA) private key');
+    logger.log('Enter your operator account private key');
+    logger.log(
+      'Note that this must be an ECDSA secp256k1 private key, and hexadecimal encoded.',
+    );
     if (operatorKey) {
       logger.log(`Current: "${operatorKey}"`);
       logger.log('(enter blank to re-use the above value)');
@@ -274,7 +291,20 @@ async function promptInputs() {
       operatorKey = inputOperatorKey || operatorKey;
     }
     if (!operatorKey) {
-      console.error('Must specify operator account private key');
+      await logger.logError('Must specify operator account private key');
+      restart = true;
+      continue;
+    }
+
+    // Validate that this key is hexadecimal.
+    // Note that if a en EdDSA ED25519 private key is used,
+    // instead of an ECDSA secp256k1 private key,
+    // it is **not possible to detect** this early/ locally.
+    // Rather it will be detected later:
+    // A different public key and therefore EVM address will be generated,
+    // and when detecting if that account has been funded, will then fail.
+    if (!isHexPrivateKey(operatorKey)) {
+      await logger.logError('Must use operator key of hexadecimal format');
       restart = true;
       continue;
     }
@@ -293,7 +323,8 @@ async function promptInputs() {
       `Please ensure that you have funded ${operatorAccountEvmAddress}`,
     );
     logger.log(
-      'If this account has not yet been created or funded, you may do so via https://faucet.hedera.com',
+      'If this account has not yet been created or funded, you may do so via',
+      ...logger.applyAnsi('URL', 'https://faucet.hedera.com'),
     );
     logger.log('(Simply enter a blank value to when this account is ready)');
     await rlPrompt.question('> '); // discard the response, no use for it
@@ -306,7 +337,7 @@ async function promptInputs() {
       );
     } catch (ex) {
       // Fail fast here, as we know this account is non-functional in its present state
-      console.error(ex.message);
+      await logger.logError(ex.message);
       restart = true;
       continue;
     }
@@ -315,7 +346,7 @@ async function promptInputs() {
       accounts[0] = operatorAccount;
     }
 
-    logger.logSection('Checking all accounts');
+    logger.logSectionWithoutWaitPrompt('Checking all accounts');
     for (let idx = 0; idx < numAccounts; idx++) {
       const account = accounts[idx];
 

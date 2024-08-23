@@ -20,10 +20,7 @@ async function initMetricsTopic() {
     throw new Error('Specify a topic memo as 1st argument');
   }
 
-  await logger.logSectionWithWaitPrompt(
-    'Creating new topic with memo:',
-    metricsHcsTopicMemo,
-  );
+  await logger.logSection('Creating new topic with memo:', metricsHcsTopicMemo);
   console.log('Creating new topic with memo:', metricsHcsTopicMemo);
   const updatedLoggerConfig = await metricsTopicCreate(
     logger,
@@ -31,7 +28,7 @@ async function initMetricsTopic() {
   );
   console.log('Updated logger config:', updatedLoggerConfig);
 
-  await logger.logSectionWithWaitPrompt('Updating logger.json.sample');
+  await logger.logSection('Updating logger.json.sample');
   const filePath = path.resolve(__dirname, '../logger.json.sample');
   let loggerSampleConfig = {
     scriptCategory: '',
