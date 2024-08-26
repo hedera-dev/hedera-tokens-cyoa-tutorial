@@ -2,13 +2,15 @@
 
 Choose-your-own-Adventure: Mint and Transfer tokens the EVM way and the Hedera-native way.
 
-- Create a fungible token using Hedera Token Service.
-- Create an ERC20 token using Hedera Smart Contract Service.
-- Discover how these 2 services can interoperate.
-
 <a href="https://gitpod.io/?autostart=true&editor=code&workspaceClass=g1-standard#https://github.com/hedera-dev/hedera-tokens-cyoa-tutorial" target="_blank" rel="noreferrer">
   <img src="./img/gitpod-open-button.svg" />
 </a>
+
+## What you will learn
+
+- Create a fungible token in Javascript using Hedera Token Service (HTS).
+- Create an ERC20 token in Solidity using Hedera Smart Contract Service (HSCS).
+- Discover how these 2 services can interoperate.
 
 This is a hands-on session - all you need are a browser and a github account.
 
@@ -96,6 +98,7 @@ No Solidity or smart contracts necessary!
 Steps:
 
 1. `cd token-hscs`
+1. `npm run compile-smart-contract`
 1. `./script` [tab] [return]
 1. Initial output
 1. Checking Solidity smart contract source code
@@ -126,7 +129,7 @@ Steps:
 1. Submit EVM request over RPC to query token balance
 1. Summary metrics
 
-## How to maintain this repo
+## Maintaining this repo
 
 1. In the root dir of the existing demo repo, run `npm run update-from-base-template`
    - This copies several files from the base template into your existing demo repo
