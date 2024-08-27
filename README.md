@@ -29,9 +29,23 @@ Watch a video demonstration walking through this entire tutorial!
 1. In the `main` terminal, which is the one that displays by default, a script will interactively prompt you
 1. Congratulations, you can now move on to the sequences! 🎉
 
-## Sequences
+## Tasks
 
 This repo contains the code required for several different ways to create and transfer tokens on Hedera.
+
+Detailed instruction for each of the tasks are provided here:
+
+- [Task (0) - Set up](task-0-setup.md)
+- [Task (1) - HTS FungibleCommon Token](task-1-hts-token.md)
+- [Task (2) - HSCS ERC20 Token](task-2-hscs-token.md)
+- [Task (3) - Interoperability between HSCS and HTS](task-3-interop.md)
+- [Task (4) - Summary and Tear Down](task-4-summary.md)
+
+Tasks (1), (2), and (3) may be completed in any order - choose your own adventure!
+If you are not familiar with web3/ EVM development, you are recommended to do task (1) right after task (0).
+If you are already familiar with web3/ EVM development, you are recommended to do task (2) right after task (0).
+
+Alternatively, you may find summary instructions below:
 
 ### Setup script
 
