@@ -16,18 +16,18 @@ This is a hands-on session - all you need are a browser and a github account.
 
 ## Video Walkthrough
 
-[![](https://i.ytimg.com/vi/LcRmhBkRNcs/maxresdefault.jpg)](https://www.youtube.com/watch?v=LcRmhBkRNcs&list=PLjyCRcs63y83i7c9A4UJxP8BYcTgpjqTJ&index=22)
+Watch video demonstrations walking through each task in this tutorial!
 
-Watch a video demonstration walking through this entire tutorial!
-
-## How to run
-
-1. Click on the "run on Gitpod" button above.
-1. Wait for Gitpod to load, this should take less than 10 seconds
-1. In the VS code terminal, you should see 3 terminals, `get_deps`, `rpcrelay_run`, and `main`
-1. You do not need to use the `get_deps` and `rpcrelay_run` terminals, let them run in the background
-1. In the `main` terminal, which is the one that displays by default, a script will interactively prompt you
-1. Congratulations, you can now move on to the sequences! 🎉
+- Task (0) - Set up
+  - [![Set up - Hedera CYOA tokens tutorial #0](https://i.ytimg.com/vi/7FCeQK7bizA/maxresdefault.jpg)](https://www.youtube.com/watch?v=7FCeQK7bizA&list=PLjyCRcs63y80nmVe9_rlT3vj-s24FvOiu&pp=)
+- Task (1) - HTS FungibleCommon Token
+  - [![HTS FungibleCommon Token - Hedera CYOA tokens tutorial #1](https://i.ytimg.com/vi/uKv_7a85k-8/maxresdefault.jpg)](https://www.youtube.com/watch?v=uKv_7a85k-8&list=PLjyCRcs63y80nmVe9_rlT3vj-s24FvOiu&pp=)
+- Task (2) - HSCS ERC20 Token
+  - [![HSCS ERC20 Token - Hedera CYOA tokens tutorial #2](https://i.ytimg.com/vi/rMrKkUhxZvU/maxresdefault.jpg)](https://www.youtube.com/watch?v=rMrKkUhxZvU&list=PLjyCRcs63y80nmVe9_rlT3vj-s24FvOiu&pp=)
+- Task (3) - Interoperability between HSCS and HTS
+  - [![Interoperability between HSCS and HTS - Hedera CYOA tokens tutorial #3](https://i.ytimg.com/vi/ftqj5PQ9JlM/maxresdefault.jpg)](https://www.youtube.com/watch?v=ftqj5PQ9JlM&list=PLjyCRcs63y80nmVe9_rlT3vj-s24FvOiu&pp=)
+- Task (4) - Summary and Tear Down
+  - [![Summary and Tear Down - Hedera CYOA tokens tutorial #4](https://i.ytimg.com/vi/es0jmvMXRME/maxresdefault.jpg)](https://www.youtube.com/watch?v=es0jmvMXRME&list=PLjyCRcs63y80nmVe9_rlT3vj-s24FvOiu&pp=)
 
 ## Tasks
 
@@ -45,7 +45,16 @@ Tasks (1), (2), and (3) may be completed in any order - choose your own adventur
 If you are not familiar with web3/ EVM development, you are recommended to do task (1) right after task (0).
 If you are already familiar with web3/ EVM development, you are recommended to do task (2) right after task (0).
 
-Alternatively, you may find summary instructions below:
+Alternatively, you may find summary instructions below
+
+## How to run
+
+1. Click on the "run on Gitpod" button above.
+1. Wait for Gitpod to load, this should take less than 10 seconds
+1. In the VS code terminal, you should see 3 terminals, `get_deps`, `rpcrelay_run`, and `main`
+1. You do not need to use the `get_deps` and `rpcrelay_run` terminals, let them run in the background
+1. In the `main` terminal, which is the one that displays by default, a script will interactively prompt you
+1. Congratulations, you can now move on to the sequences! 🎉
 
 ### Setup script
 
